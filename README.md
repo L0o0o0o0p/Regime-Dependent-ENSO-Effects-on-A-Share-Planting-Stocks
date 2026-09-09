@@ -49,11 +49,7 @@
 
 股票价格数据通过 AKShare 获取，并构造未来收益率：
 
-$$
-FwdR_{t,h}
-=
-\frac{P_{t+h}}{P_t}-1
-$$
+> **FwdRₜ,ₕ = Pₜ₊ₕ / Pₜ-1**
 
 主要研究 1、5、20、60 和 90 个交易日的未来累计收益。
 
@@ -63,9 +59,7 @@ $$
 
 本项目根据 NOAA 定义的 Niño 3.4 区域：
 
-$$
-5^\circ S-5^\circ N,\quad170^\circ W-120^\circ W
-$$
+> **5° S-5° N, 170° W-120° W**
 
 对该区域的日度 SST anomaly 进行空间平均，从而自行构建：
 
@@ -75,9 +69,7 @@ $$
 
 为了降低前视偏差，回归中使用：
 
-$$
-Nino34_{t-1}
-$$
+> **Nino34ₜ₋₁**
 
 即前一日的 Daily Niño 3.4 anomaly。
 
@@ -87,15 +79,7 @@ $$
 
 基本模型为：
 
-$$
-FwdR_{t,h}
-=
-\alpha
-+
-\beta Nino34_{t-1}
-+
-\epsilon_t
-$$
+> **FwdRₜ,ₕ = α + β Nino34ₜ₋₁ + εₜ**
 
 由于 5D、20D、60D、90D 等未来收益存在明显的 overlapping returns，例如相邻两个 60D 收益有 59 个交易日重叠，因此普通 OLS 标准误并不可靠。
 
@@ -107,7 +91,7 @@ $$
 - HAC standard error
 - z-statistic
 - p-value
-- $R^2$
+- R²
 
 ---
 
@@ -123,19 +107,11 @@ $$
 
 例如，当 ENSO 影响粮食价格时：
 
-$$
-粮价上涨
-\rightarrow
-种植企业收入可能改善
-$$
+> **粮价上涨 → 种植企业收入可能改善**
 
 但同时：
 
-$$
-玉米/豆粕上涨
-\rightarrow
-养殖企业饲料成本增加
-$$
+> **玉米/豆粕上涨 → 养殖企业饲料成本增加**
 
 因此，不同子行业的影响可能在一级指数内部相互抵消。
 
@@ -147,31 +123,19 @@ $$
 
 在最近五年的样本中：
 
-$$
-\beta_{60D}
-=
--0.0359
-$$
+> **β₆₀D = -0.0359**
 
 对应：
 
-$$
-p=0.000426
-$$
+> **p=0.000426**
 
 90D 结果为：
 
-$$
-\beta_{90D}
-=
--0.0409
-$$
+> **β₉₀D = -0.0409**
 
 对应：
 
-$$
-p=0.003929
-$$
+> **p=0.003929**
 
 60D 和 90D 均表现出显著负向关系。
 
@@ -187,19 +151,7 @@ $$
 
 可能的传导路径为：
 
-$$
-ENSO
-\rightarrow
-天气条件
-\rightarrow
-作物单产和供给预期
-\rightarrow
-农产品价格
-\rightarrow
-企业盈利预期
-\rightarrow
-种植业股票
-$$
+> **ENSO → 天气条件 → 作物单产和供给预期 → 农产品价格 → 企业盈利预期 → 种植业股票**
 
 ---
 
@@ -215,9 +167,7 @@ $$
 
 相反，这一结果提出了新的研究假设：
 
-$$
-\boxed{\text{ENSO 的 Beta 可能随市场状态变化}}
-$$
+> **ENSO 的 Beta 可能随市场状态变化**
 
 也就是说，ENSO 可能不是一个具有固定 Beta 的静态因子，而是一个：
 
@@ -245,17 +195,11 @@ $$
 
 结果为：
 
-$$
-\beta=0.0813
-$$
+> **β=0.0813**
 
-$$
-p=0.0325
-$$
+> **p=0.0325**
 
-$$
-R^2=23.15\%
-$$
+> **R²=23.15%**
 
 这一时期 ENSO Beta 与此前五年样本中的负向中期 Beta 出现明显差异，并表现为显著正向的短期关系。
 
@@ -273,53 +217,25 @@ $$
 
 为了避免仅通过比较两个独立回归判断 Beta 是否改变，本项目进一步构建交互项模型：
 
-$$
-Fwd5D_t
-=
-\alpha
-+
-\beta_1Nino34_{t-1}
-+
-\beta_2Post_t
-+
-\beta_3
-\left(
-Nino34_{t-1}
-\times
-Post_t
-\right)
-+
-\epsilon_t
-$$
+> **Fwd5Dₜ = α + β₁ Nino34ₜ₋₁ + β₂ Postₜ + β₃ ( Nino34ₜ₋₁ × Postₜ ) + εₜ**
 
 其中：
 
-$$
-Post_t=0
-$$
+> **Postₜ=0**
 
 表示状态节点之前；
 
-$$
-Post_t=1
-$$
+> **Postₜ=1**
 
 表示状态节点之后。
 
 其中最重要的是：
 
-$$
-\beta_3
-$$
+> **β₃**
 
 因为它直接检验：
 
-$$
-H_0:
-\beta_{pre}
-=
-\beta_{post}
-$$
+> **H₀: β(pre) = β(post)**
 
 即事件前后的 ENSO Beta 是否相同。
 
@@ -343,9 +259,7 @@ $$
 
 相反，它更可能集中在：
 
-$$
-\boxed{\text{种植业}}
-$$
+> **种植业**
 
 这一与天气、作物产量和农产品价格关系更直接的子行业。
 
@@ -367,9 +281,7 @@ $$
 
 因此，本项目目前最核心的发现可以概括为：
 
-$$
-\boxed{\text{ENSO may be a sector-specific and regime-dependent factor}}
-$$
+> **ENSO may be a sector-specific and regime-dependent factor**
 
 中文可以概括为：
 
@@ -399,15 +311,11 @@ $$
 
 因此，本研究识别的是：
 
-$$
-\text{association + structural change}
-$$
+> **association + structural change**
 
 而不是：
 
-$$
-\text{causality}
-$$
+> **causality**
 
 ---
 
@@ -469,11 +377,7 @@ The main market indices are:
 
 Equity price data are obtained through AKShare. Forward returns are defined as:
 
-$$
-FwdR_{t,h}
-=
-\frac{P_{t+h}}{P_t}-1
-$$
+> **FwdRₜ,ₕ = Pₜ₊ₕ / Pₜ-1**
 
 The main horizons are 1, 5, 20, 60, and 90 trading days.
 
@@ -483,9 +387,7 @@ Climate data come from NOAA OISST v2.1 daily sea-surface-temperature anomaly dat
 
 Using NOAA’s Niño 3.4 region definition:
 
-$$
-5^\circ S-5^\circ N,\quad170^\circ W-120^\circ W
-$$
+> **5° S-5° N, 170° W-120° W**
 
 the project spatially averages daily SST anomalies over the region to construct an:
 
@@ -495,9 +397,7 @@ This series is not the official NOAA monthly Niño 3.4 Index. It is a higher-fre
 
 To reduce look-ahead bias, the regressions use:
 
-$$
-Nino34_{t-1}
-$$
+> **Nino34ₜ₋₁**
 
 that is, the previous day’s Daily Niño 3.4 anomaly.
 
@@ -507,15 +407,7 @@ that is, the previous day’s Daily Niño 3.4 anomaly.
 
 The baseline specification is:
 
-$$
-FwdR_{t,h}
-=
-\alpha
-+
-\beta Nino34_{t-1}
-+
-\epsilon_t
-$$
+> **FwdRₜ,ₕ = α + β Nino34ₜ₋₁ + εₜ**
 
 Multi-day forward returns create substantial overlap. For example, two adjacent 60-day forward returns share 59 trading days. As a result, conventional OLS standard errors are not reliable.
 
@@ -527,7 +419,7 @@ The main statistics of interest are:
 - HAC standard error
 - z-statistic
 - p-value
-- $R^2$
+- R²
 
 ---
 
@@ -543,19 +435,11 @@ This suggests that:
 
 For example, if ENSO contributes to higher grain prices:
 
-$$
-Higher\ grain\ prices
-\rightarrow
-potentially\ stronger\ planting-company\ revenues
-$$
+> **Higher grain prices → potentially stronger planting-company revenues**
 
 while at the same time:
 
-$$
-Higher\ corn/soymeal\ prices
-\rightarrow
-higher\ feed\ costs\ for\ livestock\ producers
-$$
+> **Higher corn/soymeal prices → higher feed costs for livestock producers**
 
 These opposing channels may partially offset one another within the broad industry index.
 
@@ -567,31 +451,19 @@ When the dependent variable is changed to the Shenwan Planting Industry Index, t
 
 In the recent five-year sample:
 
-$$
-\beta_{60D}
-=
--0.0359
-$$
+> **β₆₀D = -0.0359**
 
 with:
 
-$$
-p=0.000426
-$$
+> **p=0.000426**
 
 For the 90-day horizon:
 
-$$
-\beta_{90D}
-=
--0.0409
-$$
+> **β₉₀D = -0.0409**
 
 with:
 
-$$
-p=0.003929
-$$
+> **p=0.003929**
 
 Both the 60-day and 90-day coefficients are significantly negative.
 
@@ -607,19 +479,7 @@ This suggests that the ENSO relationship does not behave like an immediate tradi
 
 A possible mechanism is:
 
-$$
-ENSO
-\rightarrow
-Weather\ Conditions
-\rightarrow
-Crop\ Yield\ and\ Supply\ Expectations
-\rightarrow
-Agricultural\ Commodity\ Prices
-\rightarrow
-Corporate\ Earnings\ Expectations
-\rightarrow
-Planting\ Stocks
-$$
+> **ENSO → Weather Conditions → Crop Yield and Supply Expectations → Agricultural Commodity Prices → Corporate Earnings Expectations → Planting Stocks**
 
 ---
 
@@ -635,9 +495,7 @@ Therefore, the project does not conclude that:
 
 Instead, the evidence motivates a different hypothesis:
 
-$$
-\boxed{\text{The ENSO beta may vary across market regimes}}
-$$
+> **The ENSO beta may vary across market regimes**
 
 In other words, ENSO may be better understood as a:
 
@@ -667,17 +525,11 @@ After correcting for window leakage, the effective post-event sample contains 32
 
 The estimated results are:
 
-$$
-\beta=0.0813
-$$
+> **β=0.0813**
 
-$$
-p=0.0325
-$$
+> **p=0.0325**
 
-$$
-R^2=23.15\%
-$$
+> **R²=23.15%**
 
 The post-event ENSO beta differs substantially from the negative medium-horizon beta found in the preceding five-year sample and becomes significantly positive at the short horizon.
 
@@ -695,53 +547,25 @@ Its main value is that it motivates the hypothesis that:
 
 To avoid relying only on comparisons across separate regressions, the project estimates an interaction model:
 
-$$
-Fwd5D_t
-=
-\alpha
-+
-\beta_1Nino34_{t-1}
-+
-\beta_2Post_t
-+
-\beta_3
-\left(
-Nino34_{t-1}
-\times
-Post_t
-\right)
-+
-\epsilon_t
-$$
+> **Fwd5Dₜ = α + β₁ Nino34ₜ₋₁ + β₂ Postₜ + β₃ ( Nino34ₜ₋₁ × Postₜ ) + εₜ**
 
 where:
 
-$$
-Post_t=0
-$$
+> **Postₜ=0**
 
 before the regime breakpoint, and:
 
-$$
-Post_t=1
-$$
+> **Postₜ=1**
 
 after the breakpoint.
 
 The key coefficient is:
 
-$$
-\beta_3
-$$
+> **β₃**
 
 because it directly tests:
 
-$$
-H_0:
-\beta_{pre}
-=
-\beta_{post}
-$$
+> **H₀: β(pre) = β(post)**
 
 That is, whether the ENSO beta is unchanged across the two regimes.
 
@@ -763,9 +587,7 @@ Therefore, the current evidence does not support the conclusion that regime-depe
 
 Instead, the effect appears to be concentrated in:
 
-$$
-\boxed{\text{The Planting Sector}}
-$$
+> **The Planting Sector**
 
 which is more directly exposed to weather conditions, crop yields, and agricultural commodity prices.
 
@@ -787,9 +609,7 @@ At the same time:
 
 The main finding can therefore be summarized as:
 
-$$
-\boxed{\text{ENSO may be a sector-specific and regime-dependent factor}}
-$$
+> **ENSO may be a sector-specific and regime-dependent factor**
 
 Recent A-share agriculture and planting-stock performance also appears to have become more sensitive to ENSO-related information, extreme-weather risk, and grain-price expectations, indicating stronger climate-risk repricing.
 
@@ -815,15 +635,11 @@ What the analysis shows is that:
 
 Therefore, the project identifies:
 
-$$
-\text{association + structural change}
-$$
+> **association + structural change**
 
 rather than:
 
-$$
-\text{causality}
-$$
+> **causality**
 
 ---
 
