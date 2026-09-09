@@ -5,6 +5,8 @@
 
 # 中文版
 
+> **复现范围与结果口径：**公开 notebook 和结果表目前仅覆盖申万种植业指数（801016），研究截止日为 2026-08-24。下文 801010、ONI 及跨行业比较属于前期探索记录，对应代码和结果尚未附入仓库，不能仅凭当前公开文件独立复核，也不能作为已经验证的行业差异结论。
+
 ## 项目简介
 
 本项目研究 ENSO（厄尔尼诺—南方涛动）是否包含能够解释或预测 A 股农业板块股票收益的信息，并进一步考察这种关系是否会随着市场环境的变化而发生改变。
@@ -97,6 +99,8 @@
 
 ## 第一阶段发现：整个农业板块没有稳定 ENSO 信号
 
+> 本节为前期探索记录，相关 801010、ONI 代码和结果未附入公开仓库，结论待补充复现材料验证。
+
 首先在申万农林牧渔一级指数上检验 ENSO。
 
 结果显示，无论使用连续 Daily Niño 3.4、传统 ONI，还是不同预测期限，ENSO 与整个农业板块未来收益之间都没有表现出稳定显著的关系。
@@ -145,7 +149,7 @@
 
 - 1D：不显著
 - 5D：不显著
-- 20D：不显著
+- 20D：p = 0.070906，在 5% 水平不显著，但在 10% 水平显著。
 
 这说明 ENSO 与种植业之间的关系并不像一个即时交易信号，而更可能通过较长的农业经济传导链逐渐反映到股票价格中。
 
@@ -177,7 +181,7 @@
 
 ## 第四阶段：近期市场状态出现明显变化
 
-为了进一步研究这种状态依赖性，项目选择外部事件作为市场状态节点，而不是根据回归 p-value 倒推出最佳日期。
+为了进一步研究状态依赖性，项目先比较了多个公开事件日期对应的回归窗口，再将 2026 年 7 月 3 日作为重点检验节点。因此，这属于探索性分析，而非完全预先指定的验证性检验。
 
 其中重点研究的状态切换节点为：
 
@@ -185,13 +189,13 @@
 
 之所以选择这一日期，是因为世界气象组织（WMO）在当日确认热带太平洋已形成 El Niño 条件，并预计其将在随后数月快速增强，同时明确提示农业等气候敏感行业需要关注潜在影响。
 
-因此，该日期来自外部、公开且事先存在的 ENSO 信息冲击，而不是根据回归结果或 p-value 反向筛选得到，可以作为相对客观的市场状态划分节点。
+该日期有公开事件依据，但重点选择它的过程也参考了已观察到的回归结果。公开事件日期不等于统计上的外生识别；日期选择和多重检验可能影响显著性解释。文中 p 值均为未经日期选择或多重检验校正的名义 p 值，仍需独立样本或预先指定的检验验证。
 
 需要强调的是，这一日期仅用于定义事件前后的市场状态，并不意味着 WMO 公告本身被证明导致 ENSO Beta 发生变化。
 
 随后只使用事件发生后的市场数据进行 5D forward-return 回归。
 
-在修正窗口外信息泄漏以后，2026 年 7 月 3 日至研究截止日期的有效样本为 32 个交易日。
+研究截止日期为 2026 年 8 月 24 日。7 月 3 日至该日的窗口包含 37 个交易日；在窗口内计算未来 5 日收益后，最后 5 行无法形成完整目标，因此有效回归样本为 32 个观测。
 
 结果为：
 
@@ -241,13 +245,15 @@
 
 实证结果显示：
 
-> **种植业 ENSO Beta 在该状态节点前后发生了 5% 显著性水平下的统计显著变化。**
+> **种植业 ENSO Beta 的变化在未校正的名义 5% 水平下显著（p = 0.022803）；这是探索性结果。**
 
 因此，相比单纯说“事件后的回归显著”，这一结果提供了更正式的结构变化证据。
 
 ---
 
 ## 行业层面的进一步验证
+
+> 本节为前期探索记录，801010 交互项检验的代码和结果尚未公开，不能视为已完成可复核的稳健性检验。
 
 为了验证这种状态变化是否适用于整个农业行业，本项目使用相同方法对申万农林牧渔一级指数进行检验。
 
@@ -267,31 +273,13 @@
 
 ## 核心结论
 
-目前的实证结果支持以下解释：
+公开结果表显示，最近五年的种植业 60D、90D 收益与 ENSO 存在显著负向关系，而十五年样本没有复现同样的显著性。这提示关系可能不稳定，但不同窗口的显著性差异本身不构成正式的 Beta 差异检验。
 
-> **ENSO 并不是一个能够在所有历史时期稳定解释整个 A 股农业板块收益的静态因子。**
+以 2026-07-03 为探索性节点的 5D 交互模型估计：事件前 Beta 为 −0.005414，Beta 变化为 +0.086723，事件后 Beta 为 +0.081309，变化项名义 p 值为 0.022803。事件前有 1,165 个观测，事件后仅 32 个。
 
-更具体地说：
+> **这些结果提供了种植业 ENSO 收益关系可能随状态变化的初步证据。由于节点选择参考了样本内结果，且事件后样本较短，尚不能据此确认稳定预测能力或因果效应。**
 
-> **ENSO 的市场影响具有明显的行业异质性，其统计关系主要集中在气候暴露更直接的种植业。**
-
-同时：
-
-> **种植业对 ENSO 的收益敏感度并不是长期固定的。以 2026 年 7 月 3 日作为外生状态节点后，交互项检验发现 ENSO Beta 出现统计显著变化。**
-
-因此，本项目目前最核心的发现可以概括为：
-
-> **ENSO may be a sector-specific and regime-dependent factor**
-
-中文可以概括为：
-
-> **ENSO 更可能是一个具有行业选择性和状态依赖性的农业股票因子，而不是长期固定、适用于整个农业板块的统一因子。**
-
-近期 A 股农业与种植板块的价格表现对 ENSO 相关信息、极端天气风险和粮价预期的敏感度有所上升，市场也表现出更强的气候风险再定价特征。
-
-结合本项目中事件后 ENSO Beta 的变化以及交互项对 Beta 结构变化的显著检验，可以将这些结果视为“近期市场更敏感地交易 ENSO 相关风险”的统计支持。
-
-但这一证据并不能证明交易者单独围绕 ENSO 进行交易，也不能据此建立 ENSO 与股票收益之间的因果关系。
+行业选择性仍属于研究假设；801010、ONI 及行业比较需补充代码和结果后再独立验证。本分析也没有直接测量投资者交易行为，不能仅凭回归系数推断市场已更敏感地交易气候风险。
 
 ---
 
@@ -307,7 +295,7 @@
 
 现在能够说明的是：
 
-> 以该日期作为外生状态划分节点时，事件前后的 ENSO Beta 存在显著统计差异。
+> 以该日期作为探索性状态划分节点时，事件前后的 ENSO Beta 存在显著统计差异。
 
 因此，本研究识别的是：
 
@@ -332,6 +320,8 @@
 ---
 
 # English Version
+
+> **Replication scope and result vintage:** The public notebook and result tables currently cover only the Shenwan Planting Industry Index (801016), with an analysis end date of 2026-08-24. References below to 801010, ONI, and cross-sector comparisons describe earlier exploration. Their code and results are not included, so these claims cannot be independently reproduced from this repository and do not establish verified sector differences.
 
 ## Project Overview
 
@@ -425,6 +415,8 @@ The main statistics of interest are:
 
 ## Stage 1 Finding: No Stable ENSO Signal in the Broad Agriculture Index
 
+> Earlier exploratory record: the underlying 801010 and ONI code and results are not included in the public repository. These conclusions require supporting replication materials.
+
 The analysis first tests ENSO against the broad Shenwan agriculture index.
 
 Across continuous Daily Niño 3.4 measures, conventional ONI measures, and multiple forecasting horizons, the relationship between ENSO and future returns of the broad agriculture index is not consistently significant.
@@ -473,7 +465,7 @@ At the same time:
 
 - 1D: not significant
 - 5D: not significant
-- 20D: not significant
+- 20D: p = 0.070906; not significant at 5%, but significant at 10%.
 
 This suggests that the ENSO relationship does not behave like an immediate trading signal. Instead, the effect may be transmitted gradually through the agricultural economic chain.
 
@@ -507,7 +499,7 @@ rather than a static factor with a constant beta through time.
 
 ## Stage 4: Evidence of a Recent Regime Shift
 
-To investigate regime dependence, the project uses externally defined events as market-state breakpoints rather than selecting dates based on regression p-values.
+The project first compared regression windows associated with several public event dates, then focused on 3 July 2026. This is exploratory analysis rather than a fully prespecified confirmatory test.
 
 The main breakpoint is:
 
@@ -515,13 +507,13 @@ The main breakpoint is:
 
 This date is chosen because the World Meteorological Organization (WMO) confirmed El Niño conditions in the tropical Pacific and expected the event to strengthen rapidly over the following months, while highlighting potential implications for climate-sensitive sectors such as agriculture.
 
-The breakpoint is therefore based on an external, public, and pre-existing ENSO information event rather than being selected ex post from the regression results.
+The date has a public event basis, but the decision to focus on it also considered observed regression results. A public event date does not establish statistical exogeneity. Reported p-values are nominal and unadjusted for date selection or multiple testing; independent-sample or prespecified validation is still needed.
 
 Importantly, the date is used only to define pre- and post-event market regimes. The analysis does not claim that the WMO announcement itself caused the ENSO beta to change.
 
 The project then runs a 5-day forward-return regression using only post-event data.
 
-After correcting for window leakage, the effective post-event sample contains 32 observations.
+The analysis ends on 24 August 2026. The window beginning on 3 July contains 37 trading days. Computing 5-day forward returns within this window leaves the last 5 rows without a complete target, yielding 32 valid regression observations.
 
 The estimated results are:
 
@@ -571,13 +563,15 @@ That is, whether the ENSO beta is unchanged across the two regimes.
 
 The empirical result shows that:
 
-> **The ENSO beta for planting-sector returns changes significantly across the breakpoint at the 5% significance level.**
+> **The planting-sector ENSO beta change is significant at the unadjusted nominal 5% level (p = 0.022803); this is an exploratory result.**
 
 This provides stronger evidence of a structural change than simply observing that the post-event regression is significant.
 
 ---
 
 ## Sector-Level Robustness Check
+
+> Earlier exploratory record: code and results for the 801010 interaction test are not included. This is not yet a publicly reproducible robustness check.
 
 To test whether the regime shift applies to the entire agricultural sector, the same interaction framework is applied to the broad Shenwan Agriculture, Forestry, Animal Husbandry and Fishery Index.
 
@@ -595,27 +589,13 @@ which is more directly exposed to weather conditions, crop yields, and agricultu
 
 ## Core Conclusion
 
-The empirical evidence supports the following interpretation:
+The public tables show significant negative ENSO associations with 60D and 90D planting-sector returns in the recent five-year sample, but not in the 15-year sample. This motivates an instability hypothesis; different significance levels across windows alone are not a formal test of a beta difference.
 
-> **ENSO is not a static factor that consistently explains returns across the entire A-share agricultural sector and across all historical periods.**
+For the exploratory 2026-07-03 breakpoint, the 5D interaction model estimates a pre-event beta of −0.005414, a beta change of +0.086723, and a post-event beta of +0.081309. The nominal p-value for the change is 0.022803, with 1,165 pre-event and only 32 post-event observations.
 
-More specifically:
+> **These results provide preliminary evidence that the ENSO-return relationship in planting stocks may vary across regimes. Date selection informed by in-sample results and the short post-event sample limit inference; stable forecasting performance and causality remain unestablished.**
 
-> **ENSO effects are heterogeneous across subsectors, with the strongest statistical relationship concentrated in the planting sector.**
-
-At the same time:
-
-> **The sensitivity of planting-sector returns to ENSO is not constant through time. Using 3 July 2026 as an externally defined regime breakpoint, the interaction test identifies a statistically significant change in the ENSO beta.**
-
-The main finding can therefore be summarized as:
-
-> **ENSO may be a sector-specific and regime-dependent factor**
-
-Recent A-share agriculture and planting-stock performance also appears to have become more sensitive to ENSO-related information, extreme-weather risk, and grain-price expectations, indicating stronger climate-risk repricing.
-
-Together with the post-event beta shift and the statistically significant interaction term, the results provide support for the interpretation that recent market pricing has become more sensitive to ENSO-related risks.
-
-However, this evidence does not prove that investors are trading ENSO in isolation, nor does it establish a causal relationship between ENSO and equity returns.
+Sector specificity remains a hypothesis pending public code and results for 801010, ONI, and cross-sector comparisons. The analysis does not directly measure investor trading behavior, so regression coefficients alone cannot establish increased trading sensitivity to climate risks.
 
 ---
 
@@ -631,7 +611,7 @@ Nor does it prove that:
 
 What the analysis shows is that:
 
-> When 3 July 2026 is used as an externally defined regime breakpoint, the ENSO beta differs significantly between the pre- and post-event periods.
+> When 3 July 2026 is used as an exploratory regime breakpoint, the ENSO beta differs significantly between the pre- and post-event periods.
 
 Therefore, the project identifies:
 
