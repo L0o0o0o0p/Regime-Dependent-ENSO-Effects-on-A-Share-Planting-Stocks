@@ -1,95 +1,838 @@
-# Regime-Dependent ENSO Factor in A-Share Planting Stocks
+# ENSO 对 A 股种植业股票收益的状态依赖型影响  
+# Regime-Dependent ENSO Effects on A-Share Planting Stocks
 
-[中文简介](#中文简介) · [Notebook](notebooks/ENSO_Planting_Regime_Analysis.ipynb) · [Data notes](data/README.md) · [Result tables](results/tables)
+---
 
-This research project tests whether changes in the Niño 3.4 sea-surface-temperature anomaly are associated with forward returns of the Shenwan Planting Industry Index (801016), and whether that exposure changes across market regimes.
+# 中文版
 
-The main result is evidence of a **regime-dependent association**, not a claim that ENSO consistently predicts returns or that the selected event caused the beta shift.
+## 项目简介
 
-## Research design
+本项目研究 ENSO（厄尔尼诺—南方涛动）是否包含能够解释或预测 A 股农业板块股票收益的信息，并进一步考察这种关系是否会随着市场环境的变化而发生改变。
 
-- **Climate signal:** one-calendar-day-lagged Daily Niño 3.4 SST anomaly, constructed from NOAA OISST v2.1.
-- **Equity series:** Shenwan Planting Industry Index (801016), downloaded through AKShare.
-- **Outcomes:** 1-, 5-, 20-, 60-, and 90-trading-day forward returns.
-- **Inference:** OLS with HAC/Newey–West standard errors; the baseline lag length for an overlapping `h`-day return is `h - 1`.
-- **Stability checks:** recent 5-year and 15-year samples.
-- **Formal regime test:** a 5-day forward-return interaction regression around the WMO update dated 3 July 2026.
+农业行业与气候条件存在天然联系。ENSO 可以通过改变全球温度、降水、干旱和洪涝分布，进一步影响农作物产量、农业商品供给以及农产品价格。然而，从气候冲击到股票收益之间并不存在简单的一对一关系。
 
-The formal model is:
+股票市场交易的并不是气候变量本身，而是投资者在当时政治、经济、商品价格、政策和市场情绪等综合环境下，对气候冲击未来经济影响的预期。
 
-> **Fwd5Dₜ = α + β₁ Nino34ₜ₋₁ + β₂ Postₜ + β₃(Nino34ₜ₋₁ × Postₜ) + εₜ**
+因此，本项目并不预设：
 
-Here, **β₃** tests whether the ENSO beta changes after the candidate breakpoint, and **βpost = β₁ + β₃**.
+> ENSO 上升一定导致农业股票上涨或下跌。
 
-## Main findings
+相反，本项目重点研究：
 
-The fully rerun notebook, with climate data ending on 24 August 2026, indicates:
+> **ENSO 对农业股票的影响是否具有行业差异，以及这种影响是否具有明显的状态依赖性。**
 
-- The recent 5-year sample shows negative ENSO exposure at the 60- and 90-day horizons, while the same relationship is not stable in the 15-year sample.
-- In the 5-day interaction model, the estimated pre-event beta is about `-0.0054`, the beta change is about `+0.0867`, and the implied post-event beta is about `+0.0813`.
-- The beta-change p-value is about `0.023`, but the post-event estimate is based on only 32 observations.
+---
 
-| Test | Beta | HAC p-value | N |
-|---|---:|---:|---:|
-| Recent 5Y, 60D forward return | -0.0389 | 0.0002 | 1,142 |
-| Recent 5Y, 90D forward return | -0.0409 | 0.0044 | 1,112 |
-| Regime test: pre-event 5D beta | -0.0054 | 0.0131 | 1,165 |
-| Regime test: beta change | +0.0867 | 0.0228 | 32 post-event observations |
+## 研究问题
 
-These findings are best read as preliminary evidence that the association between ENSO and planting-sector returns varies over time. They do not establish event causality, a tradable strategy, or out-of-sample predictability.
+本项目主要回答三个问题：
 
-## Repository structure
+1. **ENSO 是否与 A 股农业板块未来收益存在稳定关系？**  
+   首先使用申万农林牧渔一级指数作为研究对象，检验 Daily Niño 3.4 SST Anomaly 与不同期限未来收益之间的关系。
 
-```text
-enso-a-share-planting-factor/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── data/
-│   ├── README.md
-│   └── nino34_daily.csv
-├── notebooks/
-│   └── ENSO_Planting_Regime_Analysis.ipynb
-└── results/
-    ├── README.md
-    └── tables/
-```
+2. **ENSO 的影响是否集中在气候暴露更直接的农业子行业？**  
+   由于农林牧渔一级指数包含种植业、养殖业、饲料、渔业等不同商业模式，而 ENSO 对这些行业的影响路径甚至可能方向相反，因此进一步将研究对象缩小至申万种植业指数。
 
-## Reproduce the analysis
+3. **ENSO 的 Beta 是否会随着市场环境发生变化？**  
+   如果 ENSO 对股票收益的影响并非长期固定，那么使用一个长期样本估计单一 Beta 可能掩盖真实关系。因此，本项目进一步利用事件窗口和交互项模型检验 ENSO Beta 是否存在结构变化。
 
-Python 3.11 or later is recommended.
+---
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-jupyter lab
-```
+## 数据
 
-Open `notebooks/ENSO_Planting_Regime_Analysis.ipynb` and run all cells. The notebook reads the local climate CSV, downloads the current 801016 history through AKShare, and writes summary tables to `results/tables/`.
+### 股票市场数据
 
-Because the market series is downloaded live, a later run can differ from the committed outputs if the upstream provider revises its history. For a fully frozen replication, archive the exact market-data snapshot and document its redistribution terms.
+研究对象主要为：
 
-## Data provenance
+- 申万农林牧渔一级行业指数：`801010`
+- 申万种植业二级行业指数：`801016`
 
-- NOAA/NCEI, [Daily Optimum Interpolation Sea Surface Temperature (OISST), Version 2.1](https://psl.noaa.gov/rest/data.noaa.oisst.v2.highres.html)
-- AKShare, [`index_hist_sw` documentation](https://akshare.akfamily.xyz/data/index/index.html)
-- WMO, [El Niño is forecast to intensify — 3 July 2026](https://public.wmo.int/news/media-centre/el-nino-forecast-intensify-increasing-likelihood-of-extreme-weather)
+股票价格数据通过 AKShare 获取，并构造未来收益率：
 
-## Limitations
+$$
+FwdR_{t,h}
+=
+\frac{P_{t+h}}{P_t}-1
+$$
 
-- The post-break sample is short and statistical power is limited.
-- The breakpoint was selected from a real-world information date, but the regression does not prove that the announcement caused the change.
-- Overlapping forward returns create strong serial dependence; HAC errors reduce, but do not eliminate, model risk.
-- Commodity prices, macro conditions, policy news, seasonality, and other omitted variables may drive the estimated relationship.
-- Statistical significance in-sample is not evidence of a profitable strategy after costs.
+主要研究 1、5、20、60 和 90 个交易日的未来累计收益。
 
-## 中文简介
+### ENSO 数据
 
-本项目研究 Daily Niño 3.4 海温异常是否与申万种植业指数（801016）的未来收益相关，并检验这种敏感度是否会随市场状态变化。
+气候数据来自 NOAA OISST v2.1 日度海表温度异常数据。
 
-核心结论应谨慎表述为：**现有样本支持 ENSO 与 A 股种植业收益之间存在状态依赖型关系的初步证据**。这不代表 ENSO 在所有时期都能稳定预测收益，也不证明 2026 年 7 月 3 日的 WMO 信息发布导致了 Beta 改变。事件后样本仅有 32 个观测值，因此结果仍需更长样本、控制变量与样本外检验验证。
+本项目根据 NOAA 定义的 Niño 3.4 区域：
 
-## Disclaimer
+$$
+5^\circ S-5^\circ N,\quad170^\circ W-120^\circ W
+$$
 
-This repository is for research and educational purposes only. It is not investment advice.
+对该区域的日度 SST anomaly 进行空间平均，从而自行构建：
+
+**OISST-based Daily Niño 3.4 SST Anomaly**
+
+需要强调的是，这不是 NOAA 官方发布的标准月度 Niño 3.4 Index，而是根据 NOAA 日度 OISST 数据构造的高频 ENSO 指标。
+
+为了降低前视偏差，回归中使用：
+
+$$
+Nino34_{t-1}
+$$
+
+即前一日的 Daily Niño 3.4 anomaly。
+
+---
+
+## 基础回归方法
+
+基本模型为：
+
+$$
+FwdR_{t,h}
+=
+\alpha
++
+\beta Nino34_{t-1}
++
+\epsilon_t
+$$
+
+由于 5D、20D、60D、90D 等未来收益存在明显的 overlapping returns，例如相邻两个 60D 收益有 59 个交易日重叠，因此普通 OLS 标准误并不可靠。
+
+项目使用 **HAC / Newey-West robust standard errors** 修正异方差和序列相关问题。
+
+本项目重点关注：
+
+- Beta
+- HAC standard error
+- z-statistic
+- p-value
+- $R^2$
+
+---
+
+## 第一阶段发现：整个农业板块没有稳定 ENSO 信号
+
+首先在申万农林牧渔一级指数上检验 ENSO。
+
+结果显示，无论使用连续 Daily Niño 3.4、传统 ONI，还是不同预测期限，ENSO 与整个农业板块未来收益之间都没有表现出稳定显著的关系。
+
+这一结果提示：
+
+> 将整个农林牧渔行业作为统一资产进行分析，可能掩盖了不同子行业之间截然不同的 ENSO 暴露。
+
+例如，当 ENSO 影响粮食价格时：
+
+$$
+粮价上涨
+\rightarrow
+种植企业收入可能改善
+$$
+
+但同时：
+
+$$
+玉米/豆粕上涨
+\rightarrow
+养殖企业饲料成本增加
+$$
+
+因此，不同子行业的影响可能在一级指数内部相互抵消。
+
+---
+
+## 第二阶段发现：ENSO 信号主要集中在种植业
+
+进一步将因变量替换为申万种植业指数之后，结果发生明显变化。
+
+在最近五年的样本中：
+
+$$
+\beta_{60D}
+=
+-0.0359
+$$
+
+对应：
+
+$$
+p=0.000426
+$$
+
+90D 结果为：
+
+$$
+\beta_{90D}
+=
+-0.0409
+$$
+
+对应：
+
+$$
+p=0.003929
+$$
+
+60D 和 90D 均表现出显著负向关系。
+
+这意味着，在这一时期内，较高的 Daily Niño 3.4 anomaly 与之后约 60–90 个交易日较低的种植业累计收益存在显著统计关系。
+
+与此同时：
+
+- 1D：不显著
+- 5D：不显著
+- 20D：不显著
+
+这说明 ENSO 与种植业之间的关系并不像一个即时交易信号，而更可能通过较长的农业经济传导链逐渐反映到股票价格中。
+
+可能的传导路径为：
+
+$$
+ENSO
+\rightarrow
+天气条件
+\rightarrow
+作物单产和供给预期
+\rightarrow
+农产品价格
+\rightarrow
+企业盈利预期
+\rightarrow
+种植业股票
+$$
+
+---
+
+## 第三阶段发现：这种关系并不具有长期稳定性
+
+当样本扩展到更长的历史时期后，前述显著关系并没有保持稳定。
+
+例如，最近五年存在显著关系，而十五年样本并没有得到同样结果。
+
+因此，本项目不能得出：
+
+> ENSO 是一个长期稳定的 A 股种植业预测因子。
+
+相反，这一结果提出了新的研究假设：
+
+$$
+\boxed{\text{ENSO 的 Beta 可能随市场状态变化}}
+$$
+
+也就是说，ENSO 可能不是一个具有固定 Beta 的静态因子，而是一个：
+
+**Regime-Dependent Factor**
+
+---
+
+## 第四阶段：近期市场状态出现明显变化
+
+为了进一步研究这种状态依赖性，项目选择外部事件作为市场状态节点，而不是根据回归 p-value 倒推出最佳日期。
+
+其中重点研究的状态切换节点为：
+
+**2026 年 7 月 3 日**
+
+之所以选择这一日期，是因为世界气象组织（WMO）在当日确认热带太平洋已形成 El Niño 条件，并预计其将在随后数月快速增强，同时明确提示农业等气候敏感行业需要关注潜在影响。
+
+因此，该日期来自外部、公开且事先存在的 ENSO 信息冲击，而不是根据回归结果或 p-value 反向筛选得到，可以作为相对客观的市场状态划分节点。
+
+需要强调的是，这一日期仅用于定义事件前后的市场状态，并不意味着 WMO 公告本身被证明导致 ENSO Beta 发生变化。
+
+随后只使用事件发生后的市场数据进行 5D forward-return 回归。
+
+在修正窗口外信息泄漏以后，2026 年 7 月 3 日至研究截止日期的有效样本为 32 个交易日。
+
+结果为：
+
+$$
+\beta=0.0813
+$$
+
+$$
+p=0.0325
+$$
+
+$$
+R^2=23.15\%
+$$
+
+这一时期 ENSO Beta 与此前五年样本中的负向中期 Beta 出现明显差异，并表现为显著正向的短期关系。
+
+但需要强调：
+
+> 32 个有效观测仍然是较短样本，因此这一结果本身不足以证明 ENSO 已经成为稳定的正向短期预测因子。
+
+它更重要的作用是提出：
+
+> **ENSO 的市场定价机制可能已经发生改变。**
+
+---
+
+## 正式 Beta 变化检验
+
+为了避免仅通过比较两个独立回归判断 Beta 是否改变，本项目进一步构建交互项模型：
+
+$$
+Fwd5D_t
+=
+\alpha
++
+\beta_1Nino34_{t-1}
++
+\beta_2Post_t
++
+\beta_3
+\left(
+Nino34_{t-1}
+\times
+Post_t
+\right)
++
+\epsilon_t
+$$
+
+其中：
+
+$$
+Post_t=0
+$$
+
+表示状态节点之前；
+
+$$
+Post_t=1
+$$
+
+表示状态节点之后。
+
+其中最重要的是：
+
+$$
+\beta_3
+$$
+
+因为它直接检验：
+
+$$
+H_0:
+\beta_{pre}
+=
+\beta_{post}
+$$
+
+即事件前后的 ENSO Beta 是否相同。
+
+实证结果显示：
+
+> **种植业 ENSO Beta 在该状态节点前后发生了 5% 显著性水平下的统计显著变化。**
+
+因此，相比单纯说“事件后的回归显著”，这一结果提供了更正式的结构变化证据。
+
+---
+
+## 行业层面的进一步验证
+
+为了验证这种状态变化是否适用于整个农业行业，本项目使用相同方法对申万农林牧渔一级指数进行检验。
+
+结果并未发现 ENSO Beta 存在显著结构变化。
+
+因此，目前的证据并不支持：
+
+> ENSO 状态依赖效应已经扩展到整个 A 股农业行业。
+
+相反，它更可能集中在：
+
+$$
+\boxed{\text{种植业}}
+$$
+
+这一与天气、作物产量和农产品价格关系更直接的子行业。
+
+---
+
+## 核心结论
+
+目前的实证结果支持以下解释：
+
+> **ENSO 并不是一个能够在所有历史时期稳定解释整个 A 股农业板块收益的静态因子。**
+
+更具体地说：
+
+> **ENSO 的市场影响具有明显的行业异质性，其统计关系主要集中在气候暴露更直接的种植业。**
+
+同时：
+
+> **种植业对 ENSO 的收益敏感度并不是长期固定的。以 2026 年 7 月 3 日作为外生状态节点后，交互项检验发现 ENSO Beta 出现统计显著变化。**
+
+因此，本项目目前最核心的发现可以概括为：
+
+$$
+\boxed{\text{ENSO may be a sector-specific and regime-dependent factor}}
+$$
+
+中文可以概括为：
+
+> **ENSO 更可能是一个具有行业选择性和状态依赖性的农业股票因子，而不是长期固定、适用于整个农业板块的统一因子。**
+
+近期 A 股农业与种植板块的价格表现对 ENSO 相关信息、极端天气风险和粮价预期的敏感度有所上升，市场也表现出更强的气候风险再定价特征。
+
+结合本项目中事件后 ENSO Beta 的变化以及交互项对 Beta 结构变化的显著检验，可以将这些结果视为“近期市场更敏感地交易 ENSO 相关风险”的统计支持。
+
+但这一证据并不能证明交易者单独围绕 ENSO 进行交易，也不能据此建立 ENSO 与股票收益之间的因果关系。
+
+---
+
+## 这个结论不意味着什么
+
+当前结果不能证明：
+
+> ENSO 导致种植业股票上涨或下跌。
+
+也不能证明：
+
+> 2026 年 7 月 3 日的事件导致 ENSO Beta 改变。
+
+现在能够说明的是：
+
+> 以该日期作为外生状态划分节点时，事件前后的 ENSO Beta 存在显著统计差异。
+
+因此，本研究识别的是：
+
+$$
+\text{association + structural change}
+$$
+
+而不是：
+
+$$
+\text{causality}
+$$
+
+---
+
+## 当前项目的最终定位
+
+本项目不应被简单概括为：
+
+> “用 ENSO 预测 A 股农业股票。”
+
+更准确的定位是：
+
+> **本项目利用 NOAA 日度海温异常数据构造高频 Daily Niño 3.4 气候因子，并通过 HAC 回归、行业拆分、事件窗口和交互项结构变化检验，研究 ENSO 在 A 股种植业股票中的状态依赖型定价关系。**
+
+---
+
+# English Version
+
+## Project Overview
+
+This project investigates whether ENSO (El Niño–Southern Oscillation) contains information that can help explain or predict returns in China’s A-share agricultural sector, and whether this relationship changes across market regimes.
+
+Agriculture is naturally exposed to climate conditions. ENSO can alter global temperature, precipitation, drought, and flood patterns, which can in turn affect crop yields, agricultural supply, and commodity prices. However, the transmission from climate shocks to equity returns is not a simple one-to-one relationship.
+
+Equity markets do not trade climate variables in isolation. Investors price the expected economic consequences of climate shocks within the broader political, macroeconomic, commodity-price, policy, and market-sentiment environment.
+
+Therefore, this project does not assume that:
+
+> A stronger ENSO signal must mechanically lead agricultural stocks to rise or fall.
+
+Instead, the project focuses on whether:
+
+> **ENSO effects differ across agricultural subsectors and whether those effects are regime-dependent.**
+
+---
+
+## Research Questions
+
+The project addresses three main questions:
+
+1. **Is ENSO stably related to future returns in the broader A-share agricultural sector?**  
+   The analysis first uses the Shenwan Agriculture, Forestry, Animal Husbandry and Fishery Index and tests the relationship between the Daily Niño 3.4 SST Anomaly and forward returns over multiple horizons.
+
+2. **Is the ENSO effect concentrated in agricultural subsectors with more direct climate exposure?**  
+   The broad agriculture index combines planting, livestock breeding, feed, fisheries, and other business models. Because ENSO may affect these industries through different and even opposing channels, the analysis then narrows the dependent variable to the Shenwan Planting Industry Index.
+
+3. **Does the ENSO beta change with the market environment?**  
+   If the effect of ENSO on equity returns is not time-invariant, estimating a single beta over a long sample may mask the underlying relationship. The project therefore uses event windows and an interaction model to formally test for structural changes in the ENSO beta.
+
+---
+
+## Data
+
+### Equity Market Data
+
+The main market indices are:
+
+- Shenwan Agriculture, Forestry, Animal Husbandry and Fishery Index: `801010`
+- Shenwan Planting Industry Index: `801016`
+
+Equity price data are obtained through AKShare. Forward returns are defined as:
+
+$$
+FwdR_{t,h}
+=
+\frac{P_{t+h}}{P_t}-1
+$$
+
+The main horizons are 1, 5, 20, 60, and 90 trading days.
+
+### ENSO Data
+
+Climate data come from NOAA OISST v2.1 daily sea-surface-temperature anomaly data.
+
+Using NOAA’s Niño 3.4 region definition:
+
+$$
+5^\circ S-5^\circ N,\quad170^\circ W-120^\circ W
+$$
+
+the project spatially averages daily SST anomalies over the region to construct an:
+
+**OISST-based Daily Niño 3.4 SST Anomaly**
+
+This series is not the official NOAA monthly Niño 3.4 Index. It is a higher-frequency ENSO indicator constructed from NOAA daily OISST data.
+
+To reduce look-ahead bias, the regressions use:
+
+$$
+Nino34_{t-1}
+$$
+
+that is, the previous day’s Daily Niño 3.4 anomaly.
+
+---
+
+## Baseline Regression
+
+The baseline specification is:
+
+$$
+FwdR_{t,h}
+=
+\alpha
++
+\beta Nino34_{t-1}
++
+\epsilon_t
+$$
+
+Multi-day forward returns create substantial overlap. For example, two adjacent 60-day forward returns share 59 trading days. As a result, conventional OLS standard errors are not reliable.
+
+The project therefore uses **HAC / Newey-West robust standard errors** to account for heteroskedasticity and serial correlation.
+
+The main statistics of interest are:
+
+- Beta
+- HAC standard error
+- z-statistic
+- p-value
+- $R^2$
+
+---
+
+## Stage 1 Finding: No Stable ENSO Signal in the Broad Agriculture Index
+
+The analysis first tests ENSO against the broad Shenwan agriculture index.
+
+Across continuous Daily Niño 3.4 measures, conventional ONI measures, and multiple forecasting horizons, the relationship between ENSO and future returns of the broad agriculture index is not consistently significant.
+
+This suggests that:
+
+> Treating the entire agriculture sector as a single asset may obscure materially different ENSO exposures across subsectors.
+
+For example, if ENSO contributes to higher grain prices:
+
+$$
+Higher\ grain\ prices
+\rightarrow
+potentially\ stronger\ planting-company\ revenues
+$$
+
+while at the same time:
+
+$$
+Higher\ corn/soymeal\ prices
+\rightarrow
+higher\ feed\ costs\ for\ livestock\ producers
+$$
+
+These opposing channels may partially offset one another within the broad industry index.
+
+---
+
+## Stage 2 Finding: The ENSO Signal Is Concentrated in the Planting Sector
+
+When the dependent variable is changed to the Shenwan Planting Industry Index, the results change materially.
+
+In the recent five-year sample:
+
+$$
+\beta_{60D}
+=
+-0.0359
+$$
+
+with:
+
+$$
+p=0.000426
+$$
+
+For the 90-day horizon:
+
+$$
+\beta_{90D}
+=
+-0.0409
+$$
+
+with:
+
+$$
+p=0.003929
+$$
+
+Both the 60-day and 90-day coefficients are significantly negative.
+
+This means that, within this sample, higher Daily Niño 3.4 anomalies are statistically associated with lower cumulative planting-sector returns over the following 60–90 trading days.
+
+At the same time:
+
+- 1D: not significant
+- 5D: not significant
+- 20D: not significant
+
+This suggests that the ENSO relationship does not behave like an immediate trading signal. Instead, the effect may be transmitted gradually through the agricultural economic chain.
+
+A possible mechanism is:
+
+$$
+ENSO
+\rightarrow
+Weather\ Conditions
+\rightarrow
+Crop\ Yield\ and\ Supply\ Expectations
+\rightarrow
+Agricultural\ Commodity\ Prices
+\rightarrow
+Corporate\ Earnings\ Expectations
+\rightarrow
+Planting\ Stocks
+$$
+
+---
+
+## Stage 3 Finding: The Relationship Is Not Stable Over Long Samples
+
+When the sample is extended further back in time, the previously significant relationship does not remain stable.
+
+For example, the relationship is significant in the recent five-year sample but is not replicated in the 15-year sample.
+
+Therefore, the project does not conclude that:
+
+> ENSO is a stable long-run predictor of A-share planting-sector returns.
+
+Instead, the evidence motivates a different hypothesis:
+
+$$
+\boxed{\text{The ENSO beta may vary across market regimes}}
+$$
+
+In other words, ENSO may be better understood as a:
+
+**Regime-Dependent Factor**
+
+rather than a static factor with a constant beta through time.
+
+---
+
+## Stage 4: Evidence of a Recent Regime Shift
+
+To investigate regime dependence, the project uses externally defined events as market-state breakpoints rather than selecting dates based on regression p-values.
+
+The main breakpoint is:
+
+**3 July 2026**
+
+This date is chosen because the World Meteorological Organization (WMO) confirmed El Niño conditions in the tropical Pacific and expected the event to strengthen rapidly over the following months, while highlighting potential implications for climate-sensitive sectors such as agriculture.
+
+The breakpoint is therefore based on an external, public, and pre-existing ENSO information event rather than being selected ex post from the regression results.
+
+Importantly, the date is used only to define pre- and post-event market regimes. The analysis does not claim that the WMO announcement itself caused the ENSO beta to change.
+
+The project then runs a 5-day forward-return regression using only post-event data.
+
+After correcting for window leakage, the effective post-event sample contains 32 observations.
+
+The estimated results are:
+
+$$
+\beta=0.0813
+$$
+
+$$
+p=0.0325
+$$
+
+$$
+R^2=23.15\%
+$$
+
+The post-event ENSO beta differs substantially from the negative medium-horizon beta found in the preceding five-year sample and becomes significantly positive at the short horizon.
+
+However:
+
+> A sample of 32 effective observations is still small, so this result alone is not sufficient to establish ENSO as a stable positive short-term forecasting factor.
+
+Its main value is that it motivates the hypothesis that:
+
+> **The market pricing mechanism of ENSO may have changed.**
+
+---
+
+## Formal Beta-Shift Test
+
+To avoid relying only on comparisons across separate regressions, the project estimates an interaction model:
+
+$$
+Fwd5D_t
+=
+\alpha
++
+\beta_1Nino34_{t-1}
++
+\beta_2Post_t
++
+\beta_3
+\left(
+Nino34_{t-1}
+\times
+Post_t
+\right)
++
+\epsilon_t
+$$
+
+where:
+
+$$
+Post_t=0
+$$
+
+before the regime breakpoint, and:
+
+$$
+Post_t=1
+$$
+
+after the breakpoint.
+
+The key coefficient is:
+
+$$
+\beta_3
+$$
+
+because it directly tests:
+
+$$
+H_0:
+\beta_{pre}
+=
+\beta_{post}
+$$
+
+That is, whether the ENSO beta is unchanged across the two regimes.
+
+The empirical result shows that:
+
+> **The ENSO beta for planting-sector returns changes significantly across the breakpoint at the 5% significance level.**
+
+This provides stronger evidence of a structural change than simply observing that the post-event regression is significant.
+
+---
+
+## Sector-Level Robustness Check
+
+To test whether the regime shift applies to the entire agricultural sector, the same interaction framework is applied to the broad Shenwan Agriculture, Forestry, Animal Husbandry and Fishery Index.
+
+The broader index does not exhibit a statistically significant ENSO beta shift.
+
+Therefore, the current evidence does not support the conclusion that regime-dependent ENSO pricing extends across the entire A-share agricultural sector.
+
+Instead, the effect appears to be concentrated in:
+
+$$
+\boxed{\text{The Planting Sector}}
+$$
+
+which is more directly exposed to weather conditions, crop yields, and agricultural commodity prices.
+
+---
+
+## Core Conclusion
+
+The empirical evidence supports the following interpretation:
+
+> **ENSO is not a static factor that consistently explains returns across the entire A-share agricultural sector and across all historical periods.**
+
+More specifically:
+
+> **ENSO effects are heterogeneous across subsectors, with the strongest statistical relationship concentrated in the planting sector.**
+
+At the same time:
+
+> **The sensitivity of planting-sector returns to ENSO is not constant through time. Using 3 July 2026 as an externally defined regime breakpoint, the interaction test identifies a statistically significant change in the ENSO beta.**
+
+The main finding can therefore be summarized as:
+
+$$
+\boxed{\text{ENSO may be a sector-specific and regime-dependent factor}}
+$$
+
+Recent A-share agriculture and planting-stock performance also appears to have become more sensitive to ENSO-related information, extreme-weather risk, and grain-price expectations, indicating stronger climate-risk repricing.
+
+Together with the post-event beta shift and the statistically significant interaction term, the results provide support for the interpretation that recent market pricing has become more sensitive to ENSO-related risks.
+
+However, this evidence does not prove that investors are trading ENSO in isolation, nor does it establish a causal relationship between ENSO and equity returns.
+
+---
+
+## What the Results Do Not Establish
+
+The current evidence does not prove that:
+
+> ENSO causes planting stocks to rise or fall.
+
+Nor does it prove that:
+
+> The 3 July 2026 event caused the ENSO beta to change.
+
+What the analysis shows is that:
+
+> When 3 July 2026 is used as an externally defined regime breakpoint, the ENSO beta differs significantly between the pre- and post-event periods.
+
+Therefore, the project identifies:
+
+$$
+\text{association + structural change}
+$$
+
+rather than:
+
+$$
+\text{causality}
+$$
+
+---
+
+## Final Project Positioning
+
+This project should not be summarized simply as:
+
+> “Using ENSO to predict A-share agricultural stocks.”
+
+A more accurate description is:
+
+> **This project constructs a high-frequency Daily Niño 3.4 climate factor from NOAA daily SST anomaly data and uses HAC regressions, sector decomposition, event-window analysis, and interaction-based structural-break tests to study regime-dependent ENSO pricing in A-share planting stocks.**
