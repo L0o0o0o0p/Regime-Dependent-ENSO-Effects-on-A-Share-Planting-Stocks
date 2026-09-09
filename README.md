@@ -193,6 +193,37 @@
 
 需要强调的是，这一日期仅用于定义事件前后的市场状态，并不意味着 WMO 公告本身被证明导致 ENSO Beta 发生变化。
 
+### 为什么选择 D5 作为主要因变量？
+
+在确定 2026 年 7 月 3 日作为事件节点后，本项目首先分别以未来 **1 日、5 日和 20 日收益（D1、D5、D20）** 作为因变量，对事件后的 ENSO–种植业收益关系进行初步比较。
+
+比较结果显示：
+
+- **D1**：未达到 5% 显著性水平；
+- **D5**：达到 5% 显著性水平；
+- **D20**：未达到 5% 显著性水平。
+
+因此，在当前事件后样本中，只有 **5 个交易日的未来收益**表现出较为明确的统计关系。基于这一结果，后续事件窗口分析将 **Fwd_5D** 作为主要因变量，以进一步研究 ENSO 在约一个交易周尺度上的短期收益敏感度变化。
+
+未来 5 日收益定义为：
+
+`Fwd_5D(t) = P(t+5) / P(t) - 1`
+
+其中：
+
+- `P(t)` 表示第 `t` 个交易日的收盘价；
+- `P(t+5)` 表示之后第 5 个交易日的收盘价。
+
+基于上述 D1、D5 和 D20 的比较结果，后续重点使用事件发生后的市场数据进行 **5D forward-return 回归**。
+
+需要强调的是，D5 是在比较 D1、D5 和 D20 后选出的主要研究期限，因此这一选择属于**探索性设定（exploratory specification）**，而不是完全预先指定的验证性检验。
+
+换言之：
+
+> **D5 的统计显著性可以用于提出进一步研究假设，但不能仅凭这一结果证明 ENSO 已经成为稳定的 5 日收益预测因子。**
+
+因此，后续分析进一步通过多变量交互项回归、样本外预测以及非重叠 5 日收益检验，对该结果的稳健性进行验证。
+
 随后只使用事件发生后的市场数据进行 5D forward-return 回归。
 
 研究截止日期为 2026 年 8 月 24 日。7 月 3 日至该日的窗口包含 37 个交易日；在窗口内计算未来 5 日收益后，最后 5 行无法形成完整目标，因此有效回归样本为 32 个观测。
@@ -510,6 +541,41 @@ This date is chosen because the World Meteorological Organization (WMO) confirme
 The date has a public event basis, but the decision to focus on it also considered observed regression results. A public event date does not establish statistical exogeneity. Reported p-values are nominal and unadjusted for date selection or multiple testing; independent-sample or prespecified validation is still needed.
 
 Importantly, the date is used only to define pre- and post-event market regimes. The analysis does not claim that the WMO announcement itself caused the ENSO beta to change.
+
+### Why Is D5 Used as the Main Dependent Variable?
+
+After identifying **3 July 2026** as the event breakpoint, this project first compares the post-event relationship between ENSO and A-share planting-sector returns using **1-day, 5-day, and 20-day forward returns (D1, D5, and D20)** as alternative dependent variables.
+
+The comparison shows that:
+
+- **D1**: not statistically significant at the 5% level;
+- **D5**: statistically significant at the 5% level;
+- **D20**: not statistically significant at the 5% level.
+
+Therefore, within the current post-event sample, only the **5-trading-day forward return** shows a relatively clear statistical relationship with ENSO. Based on this result, **Fwd_5D** is used as the main dependent variable in the subsequent event-window analysis to further examine short-horizon ENSO sensitivity over approximately one trading week.
+
+The 5-day forward return is defined as:
+
+`Fwd_5D(t) = P(t+5) / P(t) - 1`
+
+where:
+
+- `P(t)` is the closing price on trading day `t`;
+- `P(t+5)` is the closing price five trading days later.
+
+Based on the comparison across D1, D5, and D20, the subsequent event-window analysis therefore focuses on **5-day forward-return regressions** using post-event market data.
+
+It is important to note that D5 was selected after comparing several return horizons. Therefore, this should be treated as an **exploratory specification**, rather than a fully pre-specified confirmatory test.
+
+In other words:
+
+> **The statistical significance of D5 can motivate further investigation, but it does not by itself establish ENSO as a stable 5-day return forecasting factor.**
+
+The D5 result is therefore further evaluated using:
+
+- multivariate interaction regressions;
+- out-of-sample forecasting;
+- non-overlapping 5-day robustness checks.
 
 The project then runs a 5-day forward-return regression using only post-event data.
 
