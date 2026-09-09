@@ -123,19 +123,19 @@
 
 在最近五年的样本中：
 
-> **β₆₀D = -0.0359**
+> **β₆₀D = -0.038947**
 
 对应：
 
-> **p=0.000426**
+> **p=0.000239**
 
 90D 结果为：
 
-> **β₉₀D = -0.0409**
+> **β₉₀D = -0.040908**
 
 对应：
 
-> **p=0.003929**
+> **p=0.004383**
 
 60D 和 90D 均表现出显著负向关系。
 
@@ -451,19 +451,19 @@ When the dependent variable is changed to the Shenwan Planting Industry Index, t
 
 In the recent five-year sample:
 
-> **β₆₀D = -0.0359**
+> **β₆₀D = -0.038947**
 
 with:
 
-> **p=0.000426**
+> **p=0.000239**
 
 For the 90-day horizon:
 
-> **β₉₀D = -0.0409**
+> **β₉₀D = -0.040908**
 
 with:
 
-> **p=0.003929**
+> **p=0.004383**
 
 Both the 60-day and 90-day coefficients are significantly negative.
 
