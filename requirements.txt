@@ -1,0 +1,4 @@
+akshare==1.18.94
+jupyterlab>=4.0,<5.0
+pandas==3.0.3
+statsmodels==0.14.6

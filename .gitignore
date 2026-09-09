@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Raw and temporary NOAA files
+*.nc
+oisst_temp/
+
+# Build and test artefacts
+.pytest_cache/
+.coverage
+dist/
+build/
