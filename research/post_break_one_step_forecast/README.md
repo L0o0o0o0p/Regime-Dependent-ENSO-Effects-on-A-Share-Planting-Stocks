@@ -7,7 +7,7 @@
 
 主回归为：
 
-$$
+```math
 R_{\mathrm{plant},t+1}
 =
 \alpha
@@ -15,7 +15,7 @@ R_{\mathrm{plant},t+1}
 \beta\,\mathrm{Nino34}_{t}
 +
 \varepsilon_{t+1}
-$$
+```
 
 其中，因变量是申万种植业指数（801016）下一交易日收益率，自变量是从 NOAA OISST v2.1 日度海温异常构造的 Daily Niño 3.4。Niño 3.4 区域为 5°S–5°N、170°W–120°W，并使用 `cos(latitude)` 进行面积加权。
 
