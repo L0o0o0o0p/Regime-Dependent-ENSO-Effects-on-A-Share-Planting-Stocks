@@ -7,9 +7,15 @@
 
 主回归为：
 
-\[
-R_{plant,t+1}=\alpha+\beta\,Nino34_t+\varepsilon_{t+1}
-\]
+$$
+R_{\mathrm{plant},t+1}
+=
+\alpha
++
+\beta\,\mathrm{Nino34}_{t}
++
+\varepsilon_{t+1}
+$$
 
 其中，因变量是申万种植业指数（801016）下一交易日收益率，自变量是从 NOAA OISST v2.1 日度海温异常构造的 Daily Niño 3.4。Niño 3.4 区域为 5°S–5°N、170°W–120°W，并使用 `cos(latitude)` 进行面积加权。
 
@@ -46,9 +52,15 @@ This subproject extends the repository's regime-dependent ENSO analysis. The can
 
 The predictive regression is:
 
-\[
-R_{plant,t+1}=\alpha+\beta\,Nino34_t+\varepsilon_{t+1}
-\]
+$$
+R_{\mathrm{plant},t+1}
+=
+\alpha
++
+\beta\,\mathrm{Nino34}_{t}
++
+\varepsilon_{t+1}
+$$
 
 The dependent variable is the next-trading-day return of the Shenwan Planting Industry Index (801016). The predictor is a Daily Niño 3.4 series constructed from NOAA OISST v2.1 daily SST anomalies over 5°S–5°N and 170°W–120°W, using `cos(latitude)` area weights.
 
