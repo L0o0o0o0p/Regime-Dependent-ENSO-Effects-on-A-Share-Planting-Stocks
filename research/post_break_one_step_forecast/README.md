@@ -1,6 +1,8 @@
 # 2026-07-03 后 ENSO 单因子一步预测
 # Post-2026-07-03 ENSO Single-Factor One-Step-Ahead Forecast
 
+[中文简介](#中文简介) | [English Introduction](#english-introduction)
+
 ## 中文简介
 
 本子项目延续主仓库的状态依赖研究。在外部 ENSO 信息事件事先确定 2026-07-03 为候选断点、且已有 beta-shift 检验确认断点前后定价 beta 不同的前提下，本分析只使用断点后的数据估计主预测模型，不使用 2026-07-03 之前的数据训练。
